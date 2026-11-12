@@ -1,0 +1,7 @@
+package com.campusconnect.ui;
+import com.campusconnect.dao.ClaimDAO;import com.campusconnect.service.Session;import javax.swing.*;import javax.swing.table.DefaultTableModel;import java.awt.*;import java.util.List;
+public class MyClaimsFrame extends JFrame {
+    private final ClaimDAO dao=new ClaimDAO();private final DefaultTableModel model=UiStyle.model(new String[]{"Claim ID","Item","Type","Your Description","Status","Claim Date"});
+    public MyClaimsFrame(){setTitle("My Claims");setSize(900,500);setLocationRelativeTo(null);setDefaultCloseOperation(DISPOSE_ON_CLOSE);setLayout(new BorderLayout(10,10));JLabel title=new JLabel("My Claims");title.setFont(new Font("Arial",Font.BOLD,25));title.setBorder(BorderFactory.createEmptyBorder(18,20,10,20));add(title,BorderLayout.NORTH);JTable table=new JTable(model);UiStyle.styleTable(table);add(new JScrollPane(table),BorderLayout.CENTER);JButton refresh=UiStyle.primary("Refresh"),close=new JButton("Close");JPanel p=new JPanel(new FlowLayout(FlowLayout.RIGHT));p.add(refresh);p.add(close);add(p,BorderLayout.SOUTH);refresh.addActionListener(e->load());close.addActionListener(e->dispose());load();setVisible(true);}
+    private void load(){try{model.setRowCount(0);List<Object[]> rows=dao.getClaimsByUserId(Session.getCurrentUser().getUserId());for(Object[] r:rows)model.addRow(r);if(rows.isEmpty())setTitle("My Claims - No claims submitted yet");}catch(Exception e){JOptionPane.showMessageDialog(this,e.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);}}
+}

@@ -1,0 +1,14 @@
+package com.campusconnect.ui;
+import com.campusconnect.model.*;import com.campusconnect.service.*;import javax.swing.*;import java.awt.*;import java.time.LocalDate;
+public class ReportItemFrame extends JFrame {
+    private final JTextField title=new JTextField(),location=new JTextField();private final JTextArea description=new JTextArea(4,20);private final JComboBox<String> category=new JComboBox<>(new String[]{"Electronics","Accessories","Documents","Books","Clothing","Keys","Other"});private final String itemType;private final ItemService service=new ItemService();
+    public ReportItemFrame(String type){itemType="FOUND".equals(type)?"FOUND":"LOST";setTitle("Report "+itemType+" Item");setSize(620,590);setLocationRelativeTo(null);setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        JPanel root=new JPanel(new BorderLayout(12,12));root.setBackground(UiStyle.BG);root.setBorder(BorderFactory.createEmptyBorder(24,30,24,30));JLabel heading=new JLabel("Report "+itemType+" Item");heading.setFont(new Font("Arial",Font.BOLD,26));root.add(heading,BorderLayout.NORTH);
+        JPanel form=new JPanel(new GridLayout(0,1,6,5));form.setBackground(Color.WHITE);form.setBorder(BorderFactory.createEmptyBorder(18,22,18,22));form.add(new JLabel("Item Title"));form.add(title);form.add(new JLabel("Category"));form.add(category);form.add(new JLabel("Location"));form.add(location);form.add(new JLabel("Description"));description.setLineWrap(true);description.setWrapStyleWord(true);form.add(new JScrollPane(description));form.add(new JLabel("Report Type: "+itemType));root.add(form,BorderLayout.CENTER);
+        JPanel buttons=new JPanel(new FlowLayout(FlowLayout.RIGHT));buttons.setOpaque(false);JButton cancel=new JButton("Cancel"),submit=UiStyle.primary("Submit Item");cancel.addActionListener(e->dispose());submit.addActionListener(e->submit());buttons.add(cancel);buttons.add(submit);root.add(buttons,BorderLayout.SOUTH);add(root);setVisible(true);
+    }
+    private void submit(){if(Session.getCurrentUser()==null){JOptionPane.showMessageDialog(this,"Please login first.");dispose();return;}String t=title.getText().trim(),loc=location.getText().trim();if(t.isBlank()||loc.isBlank()){JOptionPane.showMessageDialog(this,"Title and location are required.");return;}
+        try{int uid=Session.getCurrentUser().getUserId();String desc=description.getText().trim();Item item="LOST".equals(itemType)?new LostItem(0,t,(String)category.getSelectedItem(),desc,loc,"OPEN",uid,LocalDate.now()):new FoundItem(0,t,(String)category.getSelectedItem(),desc,loc,"OPEN",uid,LocalDate.now());
+            if(service.reportItem(item)){JOptionPane.showMessageDialog(this,"Item reported successfully.");dispose();}}
+        catch(Exception ex){JOptionPane.showMessageDialog(this,ex.getMessage(),"Report failed",JOptionPane.ERROR_MESSAGE);}}
+}
